@@ -5,9 +5,11 @@ export class database {
   static async connect() {
     let con;
     try {
+      const oraclePassword = process.env.ORACLE_PASSWORD;
+
       con = await oracledb.getConnection({
         user: "david",
-        password: "domain80",
+        password: oraclePassword,
         connectString: "localhost:1521/",
       });
 
