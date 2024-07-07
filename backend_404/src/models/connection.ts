@@ -6,9 +6,21 @@ export class database {
     let con;
     try {
       const oraclePassword = process.env.ORACLE_PASSWORD;
+      const oracleUser = process.env.ORACLE_USER;
+
+      if (!oraclePassword) {
+        throw new Error(
+          "unable to get oracle user: please set ORACLE_PASSWORD env variable"
+        );
+      }
+      if (!oracleUser) {
+        throw new Error(
+          "unable to get oracle user: please set ORACLE_USER env variable"
+        );
+      }
 
       con = await oracledb.getConnection({
-        user: "david",
+        user: oracleUser,
         password: oraclePassword,
         connectString: "localhost:1521/",
       });
