@@ -26,6 +26,8 @@ export class database {
       });
 
       console.log("connection successful");
+
+      return con;
     } catch (e) {
       console.log("error, coonnection failed");
       console.log(e);

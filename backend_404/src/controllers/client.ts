@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { database } from "../models/connection";
 
 export async function CreateClient(
   req: Request,
@@ -6,19 +7,23 @@ export async function CreateClient(
   next: NextFunction
 ) {
   try {
-    return res.status(201).json({ message: "Client created successfully" });
-  } catch (error) {
-    return next(error);
-  }
-}
+    const clientName: string = req.body.clientName;
+    if (!clientName) {
+      return res.status(200).json({
+        success: false,
+        message: "Client name required",
+      });
+    }
 
-export async function GetClient(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    return res.status(201).json({ message: "Client read successfully" });
+    const connection = await database.connect();
+
+    const query = `INSERT INTO Client (clientName) VALUES (?)`;
+    await connection.execute(query, [clientName]);
+
+    return res.status(201).json({
+      success: true,
+      message: "Client created successfully",
+    });
   } catch (error) {
     return next(error);
   }
@@ -30,31 +35,17 @@ export async function ListClients(
   next: NextFunction
 ) {
   try {
-    return res.status(200).json({ message: "Clients listed successfully" });
-  } catch (error) {
-    return next(error);
-  }
-}
+    const connection = await database.connect();
 
-export async function UpdateClient(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    return res.status(200).json({ message: "Client updated successfully" });
-  } catch (error) {
-    return next(error);
-  }
-}
+    const query = `SELECT clientNo, clientName FROM Client`;
+    const result = await connection.execute(query);
 
-export async function DeleteClient(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    return res.status(200).json({ message: "Client deleted successfully" });
+    await connection.close();
+
+    return res.status(200).json({
+      success: true,
+      data: result.rows,
+    });
   } catch (error) {
     return next(error);
   }

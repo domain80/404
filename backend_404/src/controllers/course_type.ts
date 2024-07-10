@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { database } from "../models/connection";
 
 export async function CreateCourseType(
   req: Request,
@@ -6,19 +7,24 @@ export async function CreateCourseType(
   next: NextFunction
 ) {
   try {
-    return res.status(201).json({ message: "CourseType created successfully" });
-  } catch (error) {
-    return next(error);
-  }
-}
+    const courseTypeDescription: string = req.body.courseTypeDescription;
+    if (!courseTypeDescription) {
+      return res.status(200).json({
+        success: false,
+        message: "Course type description required",
+      });
+    }
 
-export async function GetCourseType(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    return res.status(201).json({ message: "CourseType read successfully" });
+    const connection = await database.connect();
+
+    const query = `INSERT INTO CourseType (courseTypeDescription) VALUES (:courseTypeDescription)`;
+    await connection.execute(query, [courseTypeDescription]);
+
+    await connection.close();
+
+    return res.status(201).json({
+      message: "CourseType created successfully",
+    });
   } catch (error) {
     return next(error);
   }
@@ -30,31 +36,17 @@ export async function ListCourseTypes(
   next: NextFunction
 ) {
   try {
-    return res.status(200).json({ message: "CourseTypes listed successfully" });
-  } catch (error) {
-    return next(error);
-  }
-}
+    const connection = await database.connect();
 
-export async function UpdateCourseType(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    return res.status(200).json({ message: "CourseType updated successfully" });
-  } catch (error) {
-    return next(error);
-  }
-}
+    const query = `SELECT courseTypeNo, courseTypeDescription FROM CourseType`;
+    const result = await connection.execute(query);
 
-export async function DeleteCourseType(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    return res.status(200).json({ message: "CourseType deleted successfully" });
+    await connection.close();
+
+    return res.status(200).json({
+      success: true,
+      data: result.rows,
+    });
   } catch (error) {
     return next(error);
   }
